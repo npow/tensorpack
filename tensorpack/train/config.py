@@ -59,7 +59,7 @@ class TrainConfig(object):
                  model=None,
                  callbacks=None, extra_callbacks=None, monitors=None,
                  session_creator=None, session_config=None, session_init=None,
-                 starting_epoch=1, steps_per_epoch=None, max_epoch=99999,
+                 starting_epoch=1, steps_per_epoch=None, max_epoch=99999, queue_size=50,
                  **kwargs):
         """
         Args:
@@ -87,6 +87,7 @@ class TrainConfig(object):
             steps_per_epoch (int): the number of steps (defined by :meth:`Trainer.run_step`) to run in each epoch.
                 Defaults to the input data size.
             max_epoch (int): maximum number of epoch to run training.
+            queue_size (int): QueueInput size
         """
 
         # TODO type checker decorator
@@ -145,6 +146,7 @@ class TrainConfig(object):
 
         self.starting_epoch = int(starting_epoch)
         self.max_epoch = int(max_epoch)
+        self.queue_size = int(queue_size)
 
         if 'nr_tower' in kwargs:
             self.nr_tower = kwargs.pop('nr_tower')

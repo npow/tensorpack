@@ -15,7 +15,7 @@ from .trainers import SimpleTrainer
 __all__ = ['launch_train_with_config', 'apply_default_prefetch']
 
 
-def apply_default_prefetch(input_source_or_dataflow, trainer):
+def apply_default_prefetch(input_source_or_dataflow, trainer, queue_size=50):
     """
     Apply a set of default rules to make a fast :class:`InputSource`.
 
@@ -32,7 +32,7 @@ def apply_default_prefetch(input_source_or_dataflow, trainer):
             input = FeedInput(input_source_or_dataflow)
         else:
             logger.info("Automatically applying QueueInput on the DataFlow.")
-            input = QueueInput(input_source_or_dataflow)
+            input = QueueInput(input_source_or_dataflow, queue_size=queue_size)
     else:
         input = input_source_or_dataflow
     if hasattr(trainer, 'devices'):
@@ -77,8 +77,9 @@ def launch_train_with_config(config, trainer):
 
     model = config.model
     inputs_desc = model.get_inputs_desc()
+    queue_size = config.queue_size
     input = config.data or config.dataflow
-    input = apply_default_prefetch(input, trainer)
+    input = apply_default_prefetch(input, trainer, queue_size)
 
     trainer.setup_graph(
         inputs_desc, input,

@@ -176,16 +176,17 @@ class QueueInput(FeedfreeInput):
         Calling :meth:`reset_state()` will clear the queue and reset the dataflow.
     """
 
-    def __init__(self, ds, queue=None):
+    def __init__(self, ds, queue=None, queue_size=50):
         """
         Args:
             ds(DataFlow): the input DataFlow.
             queue (tf.QueueBase): A :class:`tf.QueueBase` whose type
                 should match the corresponding InputDesc of the model.
-                Defaults to a FIFO queue of size 50.
+                Defaults to a FIFO queue of size `queue_size`.
         """
         assert isinstance(ds, DataFlow), ds
         self.queue = queue
+        self.queue_size = queue_size
         self.ds = ds
         self._inf_ds = RepeatedData(ds, -1)
         self._started = False
@@ -200,7 +201,7 @@ class QueueInput(FeedfreeInput):
         with self.cached_name_scope():
             if self.queue is None:
                 self.queue = tf.FIFOQueue(
-                    50, [x.dtype for x in self._input_placehdrs],
+                    self.queue_size, [x.dtype for x in self._input_placehdrs],
                     name='input_queue')
             logger.info("Setting up the queue '{}' for CPU prefetching ...".format(self.queue.name))
             self.thread = EnqueueThread(self.queue, self._inf_ds, self._input_placehdrs)
